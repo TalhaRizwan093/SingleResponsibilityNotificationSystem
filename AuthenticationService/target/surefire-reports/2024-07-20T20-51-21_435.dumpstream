@@ -1,0 +1,5 @@
+# Created at 2024-07-20T20:51:21.597
+Boot Manifest-JAR contains absolute paths in classpath 'D:\Java Springboot learning\React + Spring Security 3.0+ OAUTH2.0 + JWT + UsernamePassword\SpringSecurityOAuth2.0 with Google\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+
