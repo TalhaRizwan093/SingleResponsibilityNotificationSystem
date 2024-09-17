@@ -1,39 +1,67 @@
 package com.toosterr.orderservice.service;
 
 import com.toosterr.orderservice.dto.OrderRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.toosterr.orderservice.model.Order;
+import com.toosterr.orderservice.repository.OrderRepository;
+import com.toosterr.orderservice.util.JwtUtil;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
 public class OrderService {
 
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
+    private final JwtUtil jwtUtil;
+    private final OrderRepository orderRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public OrderService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public OrderService(WebClient.Builder webClientBuilder, JwtUtil jwtUtil, OrderRepository orderRepository, KafkaTemplate<String, String> kafkaTemplate) {
+        this.webClient = webClientBuilder.build();
+        this.jwtUtil = jwtUtil;
+        this.orderRepository = orderRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public ResponseEntity<?> createOrder(OrderRequest orderRequest) {
-        // Decrease the quantity
+        String url = "http://PRODUCT-SERVICE/api/v1/product/purchase/sku/{sku}";
+        String newToken = jwtUtil.createToken();
 
-        String url = "http://PRODUCT-SERVICE/api/v1/product/purchase/sku/{sku}"; // Replace with the actual URL
         try {
-            var data = restTemplate.getForObject(url, String.class, orderRequest.getSku());
-            // Process the response and handle the order creation logic
-            return ResponseEntity.ok(data);
-        } catch (Exception e) {
-            // Handle the exception (e.g., logging, returning an error response)
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+            String data = webClient.get()
+                    .uri(url, orderRequest.getSku())
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + newToken)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + newToken)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
 
-        // Save the product in db as non-tracked
-        // Create Order it should consist of the following data {productId, orderId, UserId, quantity, price}
-        //Save Order
-        //Produce a notification to a kafka queue
-        //return new ResponseEntity<>("Order Created Successfully", HttpStatus.OK);
+            if(data != null && data.equals("purchased")){
+                //Add in order db
+                Order order = Order.builder()
+                        .sku(orderRequest.getSku())
+                        .price(orderRequest.getPrice())
+                        .quantity(orderRequest.getQuantity())
+                        .userId(orderRequest.getUserId())
+                        .build();
+                orderRepository.save(order);
+                kafkaTemplate.send("notificationTopic", "order created");
+            }
+
+            return new ResponseEntity<>(data, HttpStatus.OK);
+
+        } catch (WebClientResponseException.Unauthorized e) {
+            return new ResponseEntity<>(e.getResponseBodyAsString(), HttpStatus.UNAUTHORIZED);
+        } catch (WebClientResponseException.BadRequest e) {
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
 
 }

@@ -19,15 +19,23 @@ public class JwtUtil {
     @Value("${security.jwt.token.secret-key:secret}")
     private String secretKey;
 
+    @Value("${security.jwt.token.secret-key.service}")
+    private String secretKeyService;
+
 
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        secretKeyService = Base64.getEncoder().encodeToString(secretKeyService.getBytes());
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token, boolean fromService) {
         try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            if(fromService) {
+                Jwts.parser().setSigningKey(secretKeyService).parseClaimsJws(token);
+            } else {
+                Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            }
             return true;
         } catch (io.jsonwebtoken.security.SignatureException ex) {
             throw new SignatureException("Invalid JWT signature");
