@@ -18,9 +18,6 @@ public class Order extends BaseEntity {
     private Integer orderId;
 
     @Column(nullable = false)
-    private Integer productId;
-
-    @Column(nullable = false)
     private Integer userId;
 
     @Column(nullable = false, unique = true)
