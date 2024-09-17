@@ -12,6 +12,7 @@ public class OrderRequest {
     public String sku;
     public Double price;
     public int quantity;
+    public Integer userId;
 
 
 }

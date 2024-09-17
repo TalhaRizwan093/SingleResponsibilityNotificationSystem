@@ -30,8 +30,13 @@ public class GatewayRequestValidator extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            String token = jwtTokenService.resolveToken(request);
-            jwtTokenService.validateToken(token);
+            if (request.getHeader("X-Internal-Service") != null) {
+                String token = jwtTokenService.resolveToken(request);
+                jwtTokenService.validateToken(token, true);
+            } else {
+                String token = jwtTokenService.resolveToken(request);
+                jwtTokenService.validateToken(token, false);
+            }
         } catch (Exception ex) {
             String message = messageSource.getMessage("intruder.exception", new Object[]{ex.getMessage()}, LocaleContextHolder.getLocale());
             var responseData = new ResponseEntity<>(ErrorResponse.create(ex, HttpStatus.UNAUTHORIZED, message), HttpStatus.UNAUTHORIZED);
