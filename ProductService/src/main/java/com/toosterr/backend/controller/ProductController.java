@@ -59,4 +59,14 @@ public class ProductController {
         return new ResponseEntity<>(productService.getProductByAttributeId(id), HttpStatus.OK);
     }
 
+    @GetMapping("/sku/{sku}")
+    public ResponseEntity<?> getProductBySku(@PathVariable String sku) {
+        return new ResponseEntity<>(productService.getProductBySku(sku), HttpStatus.OK);
+    }
+
+    @GetMapping("/purchase/sku/{sku}")
+    public ResponseEntity<?> purchaseProductBySku(@PathVariable String sku) {
+        return new ResponseEntity<>(productService.purchaseProductBySku(sku), HttpStatus.OK);
+    }
+
 }

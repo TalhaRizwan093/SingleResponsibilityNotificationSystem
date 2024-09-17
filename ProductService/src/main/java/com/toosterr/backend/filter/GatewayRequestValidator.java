@@ -1,24 +1,18 @@
 package com.toosterr.backend.filter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.toosterr.backend.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.ErrorResponse;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 
@@ -38,7 +32,6 @@ public class GatewayRequestValidator extends OncePerRequestFilter {
         try {
             String token = jwtTokenService.resolveToken(request);
             jwtTokenService.validateToken(token);
-
         } catch (Exception ex) {
             String message = messageSource.getMessage("intruder.exception", new Object[]{ex.getMessage()}, LocaleContextHolder.getLocale());
             var responseData = new ResponseEntity<>(ErrorResponse.create(ex, HttpStatus.UNAUTHORIZED, message), HttpStatus.UNAUTHORIZED);
