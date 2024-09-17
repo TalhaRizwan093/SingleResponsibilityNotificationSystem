@@ -4,7 +4,11 @@ import com.toosterr.orderservice.dto.OrderRequest;
 import com.toosterr.orderservice.model.Order;
 import com.toosterr.orderservice.repository.OrderRepository;
 import com.toosterr.orderservice.util.JwtUtil;
+import com.toosterr.orderservice.model.Order;
+import com.toosterr.orderservice.repository.OrderRepository;
+import com.toosterr.orderservice.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +37,12 @@ public class OrderService {
     public ResponseEntity<?> createOrder(OrderRequest orderRequest) {
         String url = "http://PRODUCT-SERVICE/api/v1/product/purchase/sku/{sku}";
         String newToken = jwtUtil.createToken();
+        String newToken = jwtUtil.createToken();
 
         try {
             String data = webClient.get()
                     .uri(url, orderRequest.getSku())
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + newToken)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + newToken)
                     .retrieve()
                     .bodyToMono(String.class)
