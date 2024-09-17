@@ -128,7 +128,7 @@ public class ProductService {
     public boolean deleteProductById(Integer id) {
         Product product = productRepository.findById(id).orElse(null);
         if(product == null) {
-            throw new ProductNotFoundException("Product with not found", id);
+            throw new ProductNotFoundException("Product with not found", id.toString());
         }
         productRepository.delete(product);
         return true;
@@ -136,16 +136,29 @@ public class ProductService {
 
     public List<Product> getProductByBrandId(Integer id) {
         return productRepository.findByBrand_Id(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product with not found", id));
+                .orElseThrow(() -> new ProductNotFoundException("Product with not found", id.toString()));
     }
 
     public List<Product> getProductByCategoryId(Integer id) {
         return productRepository.findByCategories_Id(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product with not found", id));
+                .orElseThrow(() -> new ProductNotFoundException("Product with not found", id.toString()));
     }
 
     public List<Product> getProductByAttributeId(Integer id) {
         return productRepository.findByAttributes_Id(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product with not found", id));
+                .orElseThrow(() -> new ProductNotFoundException("Product with not found", id.toString()));
+    }
+
+    public Product getProductBySku(String sku) {
+        return productRepository.findOneBySku(sku)
+                .orElseThrow(() -> new ProductNotFoundException("Product with not found with sku", sku));
+    }
+
+    @Transactional
+    public String purchaseProductBySku(String sku) {
+        Product product = getProductBySku(sku);
+        product.setQuantity(product.getQuantity() - 1);
+        productRepository.save(product);
+        return "purchased";
     }
 }

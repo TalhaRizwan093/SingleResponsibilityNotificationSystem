@@ -44,7 +44,6 @@ public class JwtUtil {
                     throw new RuntimeException("Unexpected role format");
                 })
                 .collect(Collectors.toList());
-
     }
 
     public Claims extractAllClaims(String token) {

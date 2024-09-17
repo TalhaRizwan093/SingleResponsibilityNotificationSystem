@@ -27,4 +27,6 @@ public interface ProductRepository  extends PagingAndSortingRepository<Product, 
     Optional<List<Product>> findByCategories_Id(Integer id);
 
     Optional<List<Product>> findByAttributes_Id(Integer id);
+
+    Optional<Product> findOneBySku(String sku);
 }

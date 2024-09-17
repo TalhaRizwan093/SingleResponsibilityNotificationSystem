@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public class ProductNotFoundException extends RuntimeException {
-    private final Integer id;
-    public ProductNotFoundException(String message, Integer id) {
+    private final String id;
+    public ProductNotFoundException(String message, String id) {
         super(message);
         this.id = id;
     }
