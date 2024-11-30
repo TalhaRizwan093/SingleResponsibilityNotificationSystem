@@ -25,7 +25,7 @@ public class RouteValidator {
 
     public static final Map<String, List<String>> roleRequiredEndpoints = Map.of(
             "/api/v1/product/**", List.of("ROLE_USER", "ROLE_ADMIN"),
-            "/api/v1/order/**", List.of("ROLE_ADMIN")
+            "/api/v1/order/**", List.of("ROLE_USER")
     );
 
     public List<String> getRequiredRoles(String path) {
