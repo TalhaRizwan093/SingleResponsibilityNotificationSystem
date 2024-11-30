@@ -1,5 +1,7 @@
 package com.toosterr.orderservice.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.toosterr.orderservice.dto.OrderNotification;
 import com.toosterr.orderservice.dto.OrderRequest;
 import com.toosterr.orderservice.model.Order;
 import com.toosterr.orderservice.repository.OrderRepository;
@@ -49,7 +51,14 @@ public class OrderService {
                         .userId(orderRequest.getUserId())
                         .build();
                 orderRepository.save(order);
-                kafkaTemplate.send("notificationTopic", "order created");
+                OrderNotification orderNotification = OrderNotification.builder()
+                        .orderId(order.getOrderId())
+                        .customerId(order.getUserId())
+                        .productSku(order.getSku())
+                        .build();
+                ObjectMapper objectMapper = new ObjectMapper();
+                String orderNotificationJson = objectMapper.writeValueAsString(orderNotification);
+                kafkaTemplate.send("notificationTopic", orderNotificationJson);
             }
 
             return new ResponseEntity<>(data, HttpStatus.OK);
